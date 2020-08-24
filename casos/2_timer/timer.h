@@ -31,14 +31,27 @@ public:
 Timer::Timer() : hours(0), minutes(0) {}
 
 Timer::Timer(int hh, int mm) {
+  hours = hh;
+  minutes = mm;
+
+  while (minutes > 59){
+    hours = hours + 1;
+    minutes = minutes - 60;
+  }
+
+  while (hours > 23){
+    hours = hours - 24;
+  }
 }
 
 Timer::Timer(const Timer &t) {}
 
 int Timer::getHours() const {
+  return hours;
 }
 
 int Timer::getMinutes() const {
+  return minutes;
 }
 
 std::string Timer::toString() const {
