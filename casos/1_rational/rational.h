@@ -48,7 +48,7 @@ Rational::Rational(int num){
 Rational::Rational(int num, int dem){
   numerator = num;
   denominator = dem;
-  normalize;
+  normalize();
 }
 
 int Rational::getNumerator() const {
