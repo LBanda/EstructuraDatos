@@ -69,15 +69,29 @@ std::string Timer::toString() const {
 }
 
 void Timer::operator= (const Timer &right) {
+  hours = right.hours;
+  minutes = right.minutes;
 }
 
 void Timer::operator+= (const Timer &right) {
+  int aux;
+
+	aux = minutes + right.minutes;
+	minutes = aux % 60;
+	hours = (hours + right.hours + (aux / 60)) % 24;
 }
 
 bool operator== (const Timer &left, const Timer &right) {
+  return (left.getHours() == right.getHours() &&
+			left.getMinutes() == right.getMinutes());
 }
 
 bool operator> (const Timer &left, const Timer &right) {
+  if (left.getHours() == right.getHours()) {
+		return (left.getMinutes() > right.getMinutes());
+	} else {
+		return (left.getHours() > right.getHours());
+	}
 }
 
 #endif /* TIMER_H_ */

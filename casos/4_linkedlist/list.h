@@ -30,13 +30,22 @@ private:
 };
 
 template <class T>
-Link<T>::Link(T val) {}
+Link<T>::Link(T val) {
+  value = val;
+  next = 0;
+}
 
 template <class T>
-Link<T>::Link(T val, Link* nxt) {}
+Link<T>::Link(T val, Link* nxt) {
+  value = val;
+  next = nxt;
+}
 
 template <class T>
-Link<T>::Link(const Link<T> &source) {}
+Link<T>::Link(const Link<T> &source) {
+  value = source.value;
+  next = source.next;
+}
 
 template <class T>
 class List {
@@ -76,52 +85,140 @@ private:
 };
 
 template <class T>
-List<T>::List(){}
+List<T>::List(){
+  head = 0;
+  size = 0;
+}
 
 template <class T>
 List<T>::~List() {
+  clear();
 }
 
 template <class T>
 bool List<T>::empty() const {
-	return false;
+	return (head == 0);
 }
 
 template <class T>
 int List<T>::length() const {
-	return 0;
+	return size;
 }
 
 template <class T>
 bool List<T>::contains(T val) const {
+	Link<T> *p;
+
+	p = head;
+	while (p != 0) {
+		if (p->value == val) {
+			return true;
+		}
+		p = p->next;
+	}
 	return false;
 }
 
 template <class T>
 T List<T>::getFirst() const throw (NoSuchElement) {
-	return 0;
+	if (empty()) {
+		throw NoSuchElement();
+	}
+	return head->value;
 }
 
 template <class T>
 void List<T>::addFirst(T val) throw (OutOfMemory) {
+  Link<T> *newLink;
+
+	newLink = new Link<T>(val);
+	if (newLink == 0) {
+		throw OutOfMemory();
+	}
+	newLink->next = head;
+	head = newLink;
+	size++;
 }
 
 template <class T>
 void List<T>::add(T val) throw (OutOfMemory) {
+  Link<T> *newLink, *p;
+
+	newLink = new Link<T>(val);
+	if (newLink == 0) {
+		throw OutOfMemory();
+	}
+	
+	if (empty()) {
+		addFirst(val);
+		return;
+	}
+
+	p = head;
+	while (p->next != 0) {
+		p = p->next;
+	}
+
+	newLink->next = 0;
+	p->next = newLink;
+	size++;
 }
 
 template <class T>
 T List<T>::removeFirst() throw (NoSuchElement) {
-	return 0;
+	T val;
+	Link<T> *p;
+
+	if (empty()) {
+		throw NoSuchElement();
+	}
+
+	p = head;
+
+	head = p->next;
+	val = p->value;
+
+	delete p;
+	size--;
+
+	return val;
 }
 
 template <class T>
 T List<T>::get(int index) const throw (IndexOutOfBounds, NoSuchElement) {
-	return 0;
+	int pos;
+	Link<T> *p;
+
+	if (index < 0 || index >= size) {
+		throw IndexOutOfBounds();
+	}
+
+	if (index == 0) {
+		return getFirst();
+	}
+
+	p = head;
+	pos = 0;
+	while (pos != index) {
+		p = p->next;
+		pos++;
+	}
+
+	return p->value;
 }
 
 template <class T>
 void List<T>::clear() {
+  Link<T> *p, *q;
+
+	p = head;
+	while (p != 0) {
+		q = p->next;
+		delete p;
+		p = q;
+	}
+	head = 0;
+	size = 0;
 }
 
 template <class T>
@@ -144,14 +241,85 @@ std::string List<T>::toString() const {
 
 template <class T>
 List<T>::List(const List<T> &source) throw (OutOfMemory) {
+  Link<T> *p, *q;
+
+	if (source.empty()) {
+		size = 0;
+		head = 0;
+	} else {
+		p = source.head;
+		head = new Link<T>(p->value);
+		if (head == 0) {
+			throw OutOfMemory();
+		}
+		q = head;
+
+		p = p->next;
+		while(p != 0) {
+			q->next = new Link<T>(p->value);
+			if (q->next == 0) {
+				throw OutOfMemory();
+			}
+			p = p->next;
+			q = q->next;
+		}
+		size = source.size;
+	}
 }
 
 template <class T>
 void List<T>::operator=(const List<T> &source) throw (OutOfMemory) {
+  Link<T> *p, *q;
+
+	clear();
+	if (source.empty()) {
+		size = 0;
+		head = 0;
+	} else {
+		p = source.head;
+		head = new Link<T>(p->value);
+		if (head == 0) {
+			throw OutOfMemory();
+		}
+		q = head;
+
+		p = p->next;
+		while(p != 0) {
+			q->next = new Link<T>(p->value);
+			if (q->next == 0) {
+				throw OutOfMemory();
+			}
+			p = p->next;
+			q = q->next;
+		}
+		size = source.size;
+	}
 }
 
 template <class T>
 void List<T>::addBefore(ListIterator<T> &itr, T val) throw (IllegalAction, OutOfMemory) {
+  Link<T> *newLink;
+
+	if (this != itr.theList) {
+		throw IllegalAction();
+	}
+
+	newLink = new Link<T>(val);
+	if (newLink == 0) {
+		throw OutOfMemory();
+	}
+
+	if (itr.previous != 0) {
+		newLink->next = itr.current;
+		itr.previous->next = newLink;
+		itr.previous = itr.previous->next;
+		size++;
+
+	} else {
+		addFirst(val);
+		itr.previous = head;
+		itr.current = itr.previous->next;
+	}
 }
 
 template <class T>
