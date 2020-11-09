@@ -13,6 +13,7 @@
 #include <sstream>
 #include "exception.h"
 
+
 template <class T> class BST;
 
 template <class T>
@@ -37,31 +38,128 @@ public:
 };
 
 template <class T>
-TreeNode<T>::TreeNode(T val) {}
+TreeNode<T>::TreeNode(T val) {
+  value=val; 
+  left=0; 
+  right=0;
+}
 
 template <class T>
-TreeNode<T>::TreeNode(T val, TreeNode<T> *le, TreeNode<T> *ri) {}
+TreeNode<T>::TreeNode(T val, TreeNode<T> *le, TreeNode<T> *ri) {
+  value = val;
+  left = le;
+  right = ri;
+}
 
 template <class T>
 void TreeNode<T>::add(T val) {
+  if (val < value) {
+		if (left != 0) {
+			left->add(val);
+		} else {
+			left = new Node<T>(val);
+		}
+	} else {
+		if (right != 0) {
+			right->add(val);
+		} else {
+			right = new Node<T>(val);
+		}
+	}
 }
 
 template <class T>
 bool TreeNode<T>::find(T val) {
-	return false;
+	if (val == value) {
+		return true;
+	} else if (val < value) {
+		return (left != 0 && left->find(val));
+	} else if (val > value) {
+		return (right != 0 && right->find(val));
+	}
 }
 
 template <class T>
 TreeNode<T>* TreeNode<T>::succesor() {
-	return 0;
+	Node<T> *le, *ri;
+
+	le = left;
+	ri = right;
+
+	if (left == 0) {
+		if (right != 0) {
+			right = 0;
+		}
+		return ri;
+	}
+
+	if (left->right == 0) {
+		left = left->left;
+		le->left = 0;
+		return le;
+	}
+
+	Node<T> *parent, *child;
+	parent = left;
+	child = left->right;
+	while (child->right != 0) {
+		parent = child;
+		child = child->right;
+	}
+	parent->right = child->left;
+	child->left = 0;
+	return child;
 }
 
 template <class T>
 void TreeNode<T>::remove(T val) {
+  Node<T> * succ, *old;
+
+	if (val < value) {
+		if (left != 0) {
+			if (left->value == val) {
+				old = left;
+				succ = left->succesor();
+				if (succ != 0) {
+					succ->left = old->left;
+					succ->right = old->right;
+				}
+				left = succ;
+				delete old;
+			} else {
+				left->remove(val);
+			}
+		}
+	} else if (val > value) {
+		if (right != 0) {
+			if (right->value == val) {
+				old = right;
+				succ = right->succesor();
+				if (succ != 0) {
+					succ->left = old->left;
+					succ->right = old->right;
+				}
+				right = succ;
+				delete old;
+			} else {
+				right->remove(val);
+			}
+		}
+	}
 }
 
 template <class T>
 void TreeNode<T>::removeChilds() {
+  if (left != 0) {
+		left->removeChilds();
+		delete left;
+		left = 0;
+	}
+	if (right != 0) {
+		right->removeChilds();
+		delete right;
+		right = 0;
+	}
 }
 
 template <class T>
@@ -123,18 +221,48 @@ bool BST<T>::empty() const {
 
 template<class T>
 void BST<T>::add(T val) {
+  if (root != 0) {
+		if (!root->find(val)) {
+			root->add(val);
+		}
+	} else {
+		root = new Node<T>(val);
+	}
 }
 
 template <class T>
 void BST<T>::remove(T val) {
+  if (root != 0) {
+		if (val == root->value) {
+			Node<T> *succ = root->succesor();
+			if (succ != 0) {
+				succ->left = root->left;
+				succ->right = root->right;
+			}
+			delete root;
+			root = succ;
+		} else {
+			root->remove(val);
+		}
+	}
 }
 
 template <class T>
 void BST<T>::removeAll() {
+  if (root != 0) {
+		root->removeChilds();
+	}
+	delete root;
+	root = 0;
 }
 
 template <class T>
 bool BST<T>::find(T val) const {
+  if (root != 0) {
+		return root->find(val);
+	} else {
+		return false;
+	}
 }
 
 template <class T>
